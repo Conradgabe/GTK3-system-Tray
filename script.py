@@ -1,8 +1,17 @@
-import gi
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GdkPixbuf, Gio
 import requests
 import json
+import os
+import gi
+
+os.environ["LC_ALL"] = "C"
+
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk, GdkPixbuf, Gio
+from dotenv import load_dotenv
+
+load_dotenv()
+
+API_SECRET_KEY = os.environ.get("API_SECRET_KEY")
 
 class WeatherTrayApp:
     def __init__(self):
