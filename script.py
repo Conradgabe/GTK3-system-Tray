@@ -6,7 +6,7 @@ import gi
 os.environ["LC_ALL"] = "C"
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GdkPixbuf, Gio
+from gi.repository import Gtk#
 from dotenv import load_dotenv
 
 load_dotenv()
