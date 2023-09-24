@@ -85,7 +85,7 @@ class WeatherTrayApp(Gio.application):
 
             self.icon.set_tooltip_text(f"Current Naira Exchange value from dollar: $1 to N{current_price}")
         except requests.exceptions.RequestException as e:
-            print(f"Error fetching weather data: {e}")
+            print(f"Error fetching currency data: {e}")
 
         return data
 
