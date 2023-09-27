@@ -6,8 +6,10 @@ import gi
 os.environ["LC_ALL"] = "C"
 
 gi.require_version('Gtk', '3.0')
+gi.require_version('AppIndicator3', '0.1')
 
 from gi.repository import Gtk, GdkPixbuf, Gio
+from gi.repository import AppIndicator3 as AppIndicator
 from dotenv import load_dotenv
 from datetime import datetime
 
@@ -23,26 +25,27 @@ MONTH = CURRENT_DATE.month
 DAY = CURRENT_DATE.day
 
 
-class WeatherTrayApp(Gio.application):
+class WeatherTrayApp(Gio.Application):
     def __init__(self):
         super().__init__(application_id='org.gtk.WeatherTrayApp', flags=Gio.ApplicationFlags.FLAGS_NONE)
         self.connect("activate", self.activate)
 
     def create_icon(self):
         # Create a status icon
-        self.icon = Gtk.StatusIcon()
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file("./icon.png")
-        image = Gtk.Image.new_from_pixbuf(pixbuf)
-        self.icon.set_from_pixbuf(pixbuf)
+        self.indicator = AppIndicator.Indicator.new(
+                "Weather-Indicator",
+                "Weather",
+                AppIndicator.IndicatorCategory.APPLICATION_STATUS,
+            )
+        self.indicator.set_status(AppIndicator.IndicatorStatus.ACTIVE)
 
-    def activate(self):
+    def activate(self, data=None):
         self.create_icon()
-        self.window = Gtk.ApplicationWindow(application=self, title="GTK Weather App")
+        app = Gtk.Application(application_id='org.gtk.WeatherTrayApp',flags=Gio.ApplicationFlags.FLAGS_NONE)
+        self.window = Gtk.ApplicationWindow(application=app, title="GTK Weather App")
         self.window.set_default_size(200, 200)
 
-        self.icon.set_from_icon_name("weather-clear")
-        self.icon.connect("activate", self.on_activate)
-        self.icon.set_visible(True)
+        # self.connect("activate", self.on_activate)
 
         # Create a menu with a submenu for Naira exchange value
         self.menu = Gtk.Menu()
@@ -50,12 +53,15 @@ class WeatherTrayApp(Gio.application):
         self.menu.append(self.menu_item)
         self.menu_item.connect("activate", self.get_current_naira_value)
 
-        self.icon.set_menu(self.menu)
+        self.indicator.set_menu(self.menu)
 
         # Add the status icon to the system tray
-        self.tray_manager = Gtk.StatusIconTrayManager()
-        self.tray_manager.add_icon(self.icon)
+        # self.tray_manager = Gtk.StatusIconTrayManager()
+        # self.tray_manager.add_icon(self.icon)
 
+        #self.window.show_all()
+
+        self.connect("activate", self.on_activate)
         self.window.show_all()
 
     def on_activate(self):
@@ -67,13 +73,11 @@ class WeatherTrayApp(Gio.application):
             temperature = data["main"]["temp"]
 
             if data["weather"][0]["main"] == "Rain":
-                self.icon.set_tooltip_text(f"Weather: Its going to rain today and the Temperature is {temperature}°C")
+                self.indicator.set_label(f"Weather: Its going to rain today and the Temperature is {temperature}°C", "")
             else:
-                self.icon.set_tooltip_text(f"Weather: {weather} and the temperature is {temperature}°C")
+                self.indicator.set_label(f"Weather: {weather} and the temperature is {temperature}°C", "")
         except requests.exceptions.RequestException as e:
             print(f"Error fetching weather data: {e}")
-
-        return data
     
     def get_current_naira_value(self):
         try:
@@ -83,13 +87,11 @@ class WeatherTrayApp(Gio.application):
             data = json.loads(response.text)
             current_price = data["result"]
 
-            self.icon.set_tooltip_text(f"Current Naira Exchange value from dollar: $1 to N{current_price}")
+            self.indicator.set_label(f"Current Naira Exchange value from dollar: $1 to N{current_price}", "")
         except requests.exceptions.RequestException as e:
             print(f"Error fetching currency data: {e}")
-
-        return data
 
 
 if __name__ == "__main__":
     app = WeatherTrayApp()
-    app.run()
+    app.run(None)
