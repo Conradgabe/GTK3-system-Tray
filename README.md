@@ -23,3 +23,28 @@ A system tray application GUI using GTK3, It fetches API data from several APIs 
   pip install -r requirements.txt
   ```
 Follow this [steps](https://github.com/wingtk/gvsbuild#readme) to install the necessary packages on a windows Computer to run GTK3
+
+### Installation on linux
+**Install Python**
+```
+sudo apt-get install python3
+```
+
+**Install pip**
+```
+sudo apt-get install python3-pip
+```
+
+**Install Gtk**
+```
+sudo apt install python3-gi python3-gi-cairo gir1.2-gtk-3.0
+```
+
+**Install the requirements**
+```
+pip install -r requirements.txt
+```
+#### Run
+```
+python3 script.py
+```
